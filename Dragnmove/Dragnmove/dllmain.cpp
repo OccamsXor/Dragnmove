@@ -78,7 +78,7 @@ BOOL HookCreateFile() {
 
 	LONG lError = DetourTransactionCommit();
 	if (lError != NO_ERROR) {
-		MessageBox(HWND_DESKTOP, L"Failed to detour", L"HookCreateFile", MB_OK);
+		//MessageBox(HWND_DESKTOP, L"Failed to detour", L"HookCreateFile", MB_OK);
 		return FALSE;
 	}
 
@@ -94,7 +94,7 @@ BOOL DetachHooks() {
 
 	LONG lError = DetourTransactionCommit();
 	if (lError != NO_ERROR) {
-		MessageBox(HWND_DESKTOP, L"Failed to detach hooks", L"DetachHooks", MB_OK);
+		//MessageBox(HWND_DESKTOP, L"Failed to detach hooks", L"DetachHooks", MB_OK);
 		return FALSE;
 	}
 	return TRUE;
@@ -124,7 +124,7 @@ static HRESULT _Drop(
 	}
 	else {
 		sprintf_s(message, MAX_PATH - 1, "GetData  Failed: %lp", hres);
-		MessageBoxA(NULL, message, "_Drop", 0);
+		//MessageBoxA(NULL, message, "_Drop", 0);
 		//returns DV_E_FORMATETC whan failed
 	}
 
@@ -132,7 +132,7 @@ static HRESULT _Drop(
 	DragQueryFileW(hdrop, 0, DragFileW, MAX_PATH);
 	ZeroMemory(message, MAX_PATH);
 	sprintf_s(message, MAX_PATH - 1, "Dropped File: %ws", DragFileW);
-	MessageBoxA(NULL, message, "_Drop", 0);
+	//MessageBoxA(NULL, message, "_Drop", 0);
 
 	HookCreateFile();
 
@@ -149,7 +149,7 @@ extern "C" __declspec(dllexport) int HookIDropTarget() {
 
 	IDropTarget* pDropTarget;
 
-	MessageBoxA(NULL, "HookIDropTarget is started!", "HookIDropTarget", 0);
+	//MessageBoxA(NULL, "HookIDropTarget is started!", "HookIDropTarget", 0);
 
 	//Find IDropTarget*
 	hw = FindWindow(TARGETWINDOW, NULL);
@@ -160,7 +160,7 @@ extern "C" __declspec(dllexport) int HookIDropTarget() {
 	lpDrop += 0x30;
 
 	sprintf_s(message, MAX_PATH - 1, "IDropTarget Address: %lp", *pDropTarget);
-	MessageBoxA(NULL, message, "HookIDropTarget", 0);
+	//MessageBoxA(NULL, message, "HookIDropTarget", 0);
 
 	//Save original function addresses
 	RtlCopyMemory(&pOrigDrop, lpDrop, 8);
@@ -170,7 +170,7 @@ extern "C" __declspec(dllexport) int HookIDropTarget() {
 	VirtualProtect(lpDrop, 8, PAGE_EXECUTE_READWRITE, &dwPrt);
 	RtlCopyMemory(lpDrop, &lpHookDrop, 8);
 
-	MessageBoxA(NULL, "IDropTarget::Drop() is hooked", "HookIDropTarget", 0);
+	//MessageBoxA(NULL, "IDropTarget::Drop() is hooked", "HookIDropTarget", 0);
 
 	return 0;
 }
@@ -202,7 +202,7 @@ static HRESULT _Show(
 	HWND hwndOwner
 ) {
 	HRESULT hRes, hRes2;
-	MessageBoxA(NULL, "Hello From _Show()", "_Show", 0);
+	//MessageBoxA(NULL, "Hello From _Show()", "_Show", 0);
 	hRes = pShow(lpFileDialog, hwndOwner);
 	// call pfd->GetResult() to get filename
 	if (SUCCEEDED(hRes)) {
@@ -219,7 +219,7 @@ static HRESULT _Show(
 				&pszFilePath);
 			wsprintf(DragFileW, pszFilePath);
 			//MessageBoxW(NULL, pszFilePath, L"_Show", 0);
-			MessageBoxW(NULL, DragFileW, L"_Show", 0);
+			//MessageBoxW(NULL, DragFileW, L"_Show", 0);
 		}
 		// Hook CreateFileA
 		HookCreateFile();
@@ -247,7 +247,7 @@ HRESULT _CoCreateInstance(
 		pFileDialog = (IFileDialog*)*ppv;
 
 		sprintf_s(message, MAX_PATH - 1, "IFileDialog* Address: %lp", pFileDialog);
-		MessageBoxA(NULL, message, "_CoCreateInstance", 0);
+		//MessageBoxA(NULL, message, "_CoCreateInstance", 0);
 
 		// Find IFileDialog->Show address from IFileDialog*
 		// IFileDialog->Show vtable index 3	
@@ -256,7 +256,7 @@ HRESULT _CoCreateInstance(
 		RtlCopyMemory(&lpShow, pFileDialog, 8);
 		lpShow += 0x18;
 		sprintf_s(message, MAX_PATH - 1, "IFileDialog->Show() Address: %lp", lpShow);
-		MessageBoxA(NULL, message, "_CoCreateInstance", 0);
+		//MessageBoxA(NULL, message, "_CoCreateInstance", 0);
 		// Backup original address
 		RtlCopyMemory(&pShow, lpShow, 8);
 		// Overwrite 
@@ -269,7 +269,7 @@ HRESULT _CoCreateInstance(
 		VirtualProtect(lpShow, 8, PAGE_EXECUTE_READWRITE, &oldProtect);
 		RtlCopyMemory(lpShow, &lpHookShow, 8);
 
-		MessageBoxA(NULL, "IFileDialog->Show is overwritten!", "_CoCreateInstance", 0);
+		//MessageBoxA(NULL, "IFileDialog->Show is overwritten!", "_CoCreateInstance", 0);
 	}
 
 	return hRes;
@@ -281,7 +281,7 @@ extern "C" __declspec(dllexport) int HookCoCreateInstance() {
 	LPVOID lpCoCreateInstance = GetProcAddress(hModule, "CoCreateInstance");
 	RtlCopyMemory(&pCoCreateInstance, &lpCoCreateInstance, 8);
 
-	MessageBoxA(NULL, "Hooking CoCreateInstance call!", "HookCoCreateInstance", 0);
+	//MessageBoxA(NULL, "Hooking CoCreateInstance call!", "HookCoCreateInstance", 0);
 
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
@@ -291,7 +291,7 @@ extern "C" __declspec(dllexport) int HookCoCreateInstance() {
 
 	LONG lError = DetourTransactionCommit();
 	if (lError != NO_ERROR) {
-		MessageBox(HWND_DESKTOP, L"Failed to detour", L"detour", MB_OK);
+		//MessageBox(HWND_DESKTOP, L"Failed to detour", L"detour", MB_OK);
 		return FALSE;
 	}
 
@@ -307,14 +307,14 @@ HANDLE _GetClipboardData(
 ) {
 	HGLOBAL hGlobal = pGetClipboardData(uFormat);
 	if (uFormat == CF_HDROP) {
-		MessageBoxA(NULL, "Hello from _GetClipboardData!", "_GetClipboardData", 0);
+		//MessageBoxA(NULL, "Hello from _GetClipboardData!", "_GetClipboardData", 0);
 		WCHAR lpszFileName[MAX_PATH];
 
 		HDROP hDrop = (HDROP)GlobalLock(hGlobal);
 		UINT filenameLength = DragQueryFile(hDrop, 0, 0, 0);
 		DragQueryFile(hDrop, 0, lpszFileName, filenameLength + 1);
 		wsprintf(DragFileW, lpszFileName);
-		MessageBoxW(NULL, DragFileW, L"_GetClipboardData", 0);
+		//MessageBoxW(NULL, DragFileW, L"_GetClipboardData", 0);
 		GlobalUnlock(hGlobal);
 
 		HookCreateFile();
@@ -338,13 +338,13 @@ HRESULT _OleGetClipboard(
 	HRESULT hres = pOleGetClipboard(ppDataObj);
 
 	if (SUCCEEDED(((IDataObject*)ppDataObj)->GetData(&formatetc, &stgmedium))) {
-		MessageBoxA(NULL, "GetData succeeded!", "_OleGetClipboard", 0);
+		//MessageBoxA(NULL, "GetData succeeded!", "_OleGetClipboard", 0);
 
 		hdrop = (HDROP)stgmedium.hGlobal;
 		DragQueryFileW(hdrop, 0, DragFileW, MAX_PATH);
 		ZeroMemory(message, MAX_PATH);
 		sprintf_s(message, MAX_PATH - 1, "Pasted File: %ws", DragFileW);
-		MessageBoxA(NULL, message, "_OleGetClipboard", 0);
+		//MessageBoxA(NULL, message, "_OleGetClipboard", 0);
 
 		HookCreateFile();
 	}
@@ -359,7 +359,7 @@ extern "C" __declspec(dllexport) int HookCopyPaste() {
 	RtlCopyMemory(&pGetClipboardData, &lpGetClipboardData, 8);
 	RtlCopyMemory(&pOleGetClipboard, &lpOleGetClipboard, 8);
 
-	MessageBoxA(NULL, "Hooking GetClipboardData and OleGetClipboard call!", "HookCopyPaste", 0);
+	//MessageBoxA(NULL, "Hooking GetClipboardData and OleGetClipboard call!", "HookCopyPaste", 0);
 
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
@@ -371,7 +371,7 @@ extern "C" __declspec(dllexport) int HookCopyPaste() {
 
 	LONG lError = DetourTransactionCommit();
 	if (lError != NO_ERROR) {
-		MessageBox(HWND_DESKTOP, L"Failed to detour", L"detour", MB_OK);
+		//MessageBox(HWND_DESKTOP, L"Failed to detour", L"detour", MB_OK);
 		return FALSE;
 	}
 
